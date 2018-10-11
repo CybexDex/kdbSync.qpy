@@ -22,7 +22,7 @@ pip install pymongo
 
 3. install flatten json tool
 ```
-pip install flatten
+pip install flatten_json
 ```
 
 4. Set kdb/q
