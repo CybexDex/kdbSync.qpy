@@ -12,38 +12,25 @@ import q, logging, time
 logging.basicConfig(level=logging.DEBUG,
                 format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                 datefmt='%a, %d %b %Y %H:%M:%S',
-                filename='test.log',
+                filename='log.log',
                 filemode='w')
 
-qconn = q.q(host = 'localhost', port = 9009, user = 'sunqi')
-qconn.k('\\l /home/sunqi/mudb/test1/test.q')
+qconn = q.q(host = 'localhost', port = config.Q_port , user = 'sunqi')
+# qconn.k('\\l /home/sunqi/mudb/test1/test.q')
+logging.info("Loading " + config.Q_Script + "...")
+qconn.k('\\l ' + config.Q_Script )
 
 client = MongoClient(config.MONGODB_DB_URL)
 db = client[config.MONGODB_DB_NAME]
-# bitshares = BitShares(config.BTS_NODE)
-def conn_reset_num(qconn):
-    for i in xrange(51):
-        op = 'op' + str(i)
-        try:
-            qconn.k('tbname:`%s ;tbupdate[%s]'%(op,op))
-            qconn.k('delete %s from `.' % (op))
-        except:
-            logging.error( op + ' not found!')
-    # qconn.close()
-    # qconn = q.q(host = 'localhost', port = 9009, user = 'sunqi')
-    qconn.k('\\l /home/sunqi/mudb/test1/test.q')
-    # return qconn
-
-
 
 def conn_reset(qconn):
     op = 'op' 
     try:
         qconn.k('tbname:`%s ;tbupdate[%s]'%(op,op))
-        qconn.k('delete %s from `.' % (op))
+        qconn.k('opback:op;delete %s from `.' % (op))
     except:
         logging.error( op + ' not found!')
-    qconn.k('\\l /home/sunqi/mudb/test1/test.q')
+    qconn.k('\\l ' + config.Q_Script)
 
 
 
@@ -56,8 +43,8 @@ def get_lib():
         exit(1)
     return res
 
-start_blk = 3000001 
-blk_circle = 50000
+start_blk = config.START_BLK
+blk_circle = 10000
 def get_mongo_lib():
     init_size_limit_json = list(db.account_history.find().sort([("_id",-1)]).limit(1))[0]
     init_size_limit = init_size_limit_json['bulk']['block_data']['block_num']
@@ -81,12 +68,12 @@ while 1:
             time.sleep(10)
             continue
     for n in range(len(j)):
-        feejson = j[n]['op']['fee']
+        
         tmpres = {}
         tmpres['id'] = str(j[n]['_id'] )
-        tmpres['fee'] = feejson
+        tmpres['fee'] = j[n]['op']['fee']
         tmpres['bulk'] = j[n]['bulk']
-        content = flatten(tmpres , '__')
+        content = flatten(tmpres, '__')
         json2k = json.dumps(json.dumps(content))
         sql = 'json2k : ' + json2k + ';ele: enlist .j.k  json2k ;ele: update bulk__block_data__block_time:"P"$bulk__block_data__block_time from ele;'
         qconn.k(sql)
@@ -107,10 +94,6 @@ qconn.close()
 def parse(j):
     from flatten_json import flatten
     import json
-    # opjson = j['operation_history']['op']
-    # operation_type = j['operation_type']
-    # j['operation_history']['op'] = json.loads(opjson)[1]
-    # j['_id'] = str(j['_id'] )
     content = flatten(j, '__')
     for _k in content.keys():
         if 'memo' in _k or 'extensions' in _k :
