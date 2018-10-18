@@ -12,13 +12,11 @@ import q, logging, time
 logging.basicConfig(level=logging.DEBUG,
                 format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                 datefmt='%a, %d %b %Y %H:%M:%S',
-                filename='log.log',
+                filename='test.log',
                 filemode='w')
 
-qconn = q.q(host = 'localhost', port = config.Q_port , user = 'sunqi')
-# qconn.k('\\l /home/sunqi/mudb/test1/test.q')
-logging.info("Loading " + config.Q_Script + "...")
-qconn.k('\\l ' + config.Q_Script )
+qconn = q.q(host = 'localhost', port = 9009, user = 'sunqi')
+qconn.k('\\l /home/sunqi/mudb/test1/test.q')
 
 client = MongoClient(config.MONGODB_DB_URL)
 db = client[config.MONGODB_DB_NAME]
@@ -32,7 +30,8 @@ def conn_reset_num(qconn):
         except:
             logging.error( op + ' not found!')
     # qconn.close()
-    qconn.k('\\l ' + config.Q_Script)
+    # qconn = q.q(host = 'localhost', port = 9009, user = 'sunqi')
+    qconn.k('\\l /home/sunqi/mudb/test1/test.q')
     # return qconn
 
 
@@ -44,7 +43,7 @@ def conn_reset(qconn):
         qconn.k('delete %s from `.' % (op))
     except:
         logging.error( op + ' not found!')
-    qconn.k('\\l ' + config.Q_Script)
+    qconn.k('\\l /home/sunqi/mudb/test1/test.q')
 
 
 
@@ -57,8 +56,8 @@ def get_lib():
         exit(1)
     return res
 
-start_blk = config.START_BLK
-blk_circle = 10000
+start_blk = 3000001 
+blk_circle = 50000
 def get_mongo_lib():
     init_size_limit_json = list(db.account_history.find().sort([("_id",-1)]).limit(1))[0]
     init_size_limit = init_size_limit_json['bulk']['block_data']['block_num']
@@ -83,17 +82,15 @@ while 1:
             continue
     for n in range(len(j)):
         feejson = j[n]['op']['fee']
-        j[n]['id'] = str(j[n]['_id'] )
-        j[n].pop('op')
-        j[n]['fee'] = feejson
-        content = flatten(j[n], '__')
-        content.pop('_id')
+        tmpres = {}
+        tmpres['id'] = str(j[n]['_id'] )
+        tmpres['fee'] = feejson
+        tmpres['bulk'] = j[n]['bulk']
+        content = flatten(tmpres , '__')
         json2k = json.dumps(json.dumps(content))
         sql = 'json2k : ' + json2k + ';ele: enlist .j.k  json2k ;ele: update bulk__block_data__block_time:"P"$bulk__block_data__block_time from ele;'
         qconn.k(sql)
-        # sql = 'op%d,: ele;' % (operation_type)
         sql = 'op,: ele;'
-        # qconn.k(sql)
         try:
             qconn.k(sql)
         except:
@@ -110,6 +107,10 @@ qconn.close()
 def parse(j):
     from flatten_json import flatten
     import json
+    # opjson = j['operation_history']['op']
+    # operation_type = j['operation_type']
+    # j['operation_history']['op'] = json.loads(opjson)[1]
+    # j['_id'] = str(j['_id'] )
     content = flatten(j, '__')
     for _k in content.keys():
         if 'memo' in _k or 'extensions' in _k :
