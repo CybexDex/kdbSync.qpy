@@ -1,6 +1,7 @@
 
 /dbpath:`:/home/sunqi/mudb/cybex
-dbpath:`:/data2/db/kdb/cybex
+/dbpath:`:/data2/db/kdb/cybex
+dbpath:`:/data2/db/kdb/cybex_fee
 tbname:`testop0
 
 sympath: ` sv dbpath,`$"/db";

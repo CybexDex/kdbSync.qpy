@@ -24,12 +24,13 @@ client = MongoClient(config.MONGODB_DB_URL)
 db = client[config.MONGODB_DB_NAME]
 
 def conn_reset(qconn):
-    op = 'op' 
+    op4 = 'op4' 
     try:
-        qconn.k('tbname:`%s ;tbupdate[%s]'%(op,op))
-        qconn.k('opback:op;delete %s from `.' % (op))
+        qconn.k('tbname:`%s ;tbupdate[%s]'%(op4,op4))
+        qconn.k('mvcsv[`op4]')
+        qconn.k('op4back:op4;delete %s from `.' % (op4))
     except:
-        logging.error( op + ' not found!')
+        logging.error( op4 + ' not found!')
     qconn.k('\\l ' + config.Q_Script)
 
 
@@ -37,22 +38,25 @@ def conn_reset(qconn):
 def get_lib():
     import os
     try:
-        res = int(os.popen('/usr/bin/python3 bts_info.py').read())
+        res = int(os.popen('/usr/bin/python3 ../bts_info.py').read())
     except:
         logging.error('lib script failed')
         exit(1)
     return res
 
-start_blk = config.START_BLK
-blk_circle = 10800
+# start_blk = config.START_BLK
+start_blk = 450 * 24
+blk_circle = start_blk
 def get_mongo_lib():
     init_size_limit_json = list(db.account_history.find().sort([("_id",-1)]).limit(1))[0]
     init_size_limit = init_size_limit_json['bulk']['block_data']['block_num']
     return init_size_limit
 # logging.info("=========== query blocks till -> "+ str(init_size_limit) +"===================\n")
-blk_num = start_blk
+def get_start(last):
+    return last - blk_circle
 lib = get_lib()
-#for blk_num in xrange(start_blk, init_size_limit):
+blk_num = get_start(lib)
+
 while 1:
     if blk_num >= lib - 1:
         time.sleep(2)
@@ -67,17 +71,16 @@ while 1:
             logging.erorr('Zero trx from mongo, please check mongodb!')
             time.sleep(10)
             continue
-    for n in range(len(j)):
-        
-        tmpres = {}
-        tmpres['id'] = str(j[n]['_id'] )
-        tmpres['fee'] = j[n]['op']['fee']
-        tmpres['bulk'] = j[n]['bulk']
-        content = flatten(tmpres, '__')
+    for n in range(len(j)):#only deal op4
+        if j[n]['bulk']['operation_type'] != 4:
+            continue
+        j[n]['id'] = str(j[n]['_id'] )
+        j[n].pop('_id')
+        content = flatten(j[n] , '__')
         json2k = json.dumps(json.dumps(content))
         sql = 'json2k : ' + json2k + ';ele: enlist .j.k  json2k ;ele: update bulk__block_data__block_time:"P"$bulk__block_data__block_time from ele;'
         qconn.k(sql)
-        sql = 'op,: ele;'
+        sql = 'op4,: ele;'
         try:
             qconn.k(sql)
         except:
