@@ -19,19 +19,25 @@ qconn = q.q(host = 'localhost', port = config.Q_port , user = 'sunqi')
 # qconn.k('\\l /home/sunqi/mudb/test1/test.q')
 logging.info("Loading " + config.Q_Script + "...")
 qconn.k('\\l ' + config.Q_Script )
+qconn.k('setDBEnv[`:%s;`%s];' % (config.Q_DBPATH, 'op4') )
 
 client = MongoClient(config.MONGODB_DB_URL)
 db = client[config.MONGODB_DB_NAME]
 
 def conn_reset(qconn):
-    op4 = 'op4' 
     try:
-        qconn.k('tbname:`%s ;tbupdate[%s]'%(op4,op4))
-        qconn.k('mvcsv[`op4]')
-        qconn.k('op4back:op4;delete %s from `.' % (op4))
+        qconn.k('tbupdate[op4]')
+        logging.info( 'dump suceed!')
     except:
-        logging.error( op4 + ' not found!')
+        logging.error( 'dump failed!')
+    try:
+        # qconn.k('mvcsv[`op4]')
+        # qconn.k('op4back:op4;delete op4 from `.' )
+        qconn.k('op4back:op4;op4:0#op4 ;' )
+    except:
+        logging.error( 'op4 not found!')
     qconn.k('\\l ' + config.Q_Script)
+    qconn.k('setDBEnv[`:%s;`%s];' % (config.Q_DBPATH, 'op4') )
 
 
 
@@ -45,8 +51,7 @@ def get_lib():
     return res
 
 # start_blk = config.START_BLK
-start_blk = 450 * 24
-blk_circle = start_blk
+blk_circle = 1200*24
 def get_mongo_lib():
     init_size_limit_json = list(db.account_history.find().sort([("_id",-1)]).limit(1))[0]
     init_size_limit = init_size_limit_json['bulk']['block_data']['block_num']
@@ -57,13 +62,14 @@ def get_start(last):
 lib = get_lib()
 blk_num = get_start(lib)
 
+logging.info("=========== query blocks start -> "+ str(blk_num) +"===================\n")
 while 1:
     if blk_num >= lib - 1:
         time.sleep(2)
         lib = get_lib()
         continue
     logging.info("----------deal block " + str(blk_num))
-    j = list(db.account_history.find({'bulk.block_data.block_num': blk_num}))
+    j = list(db.account_history.find({'bulk.block_data.block_num': blk_num, 'bulk.operation_type':4}))
     if len(j) == 0:
         mongo_blk_num = get_mongo_lib()
         if mongo_blk_num <= blk_num:
@@ -72,19 +78,20 @@ while 1:
             time.sleep(10)
             continue
     for n in range(len(j)):#only deal op4
-        if j[n]['bulk']['operation_type'] != 4:
-            continue
         j[n]['id'] = str(j[n]['_id'] )
         j[n].pop('_id')
+        j[n].pop('result')
         content = flatten(j[n] , '__')
+        for kk in ('op__fill_price__quote__amount','op__fill_price__base__amount','op__pays__amount','op__receives__amount'):
+            content[kk] = float(content[kk] )
         json2k = json.dumps(json.dumps(content))
-        sql = 'json2k : ' + json2k + ';ele: enlist .j.k  json2k ;ele: update bulk__block_data__block_time:"P"$bulk__block_data__block_time from ele;'
-        qconn.k(sql)
-        sql = 'op4,: ele;'
+        # sql = 'json2k : ' + json2k + ';ele: enlist .j.k  json2k ;ele: update bulk__block_data__block_time:"P"$bulk__block_data__block_time from ele;'
+        sql = 'json2k : ' + json2k + ';eleUpdate[json2k];'
         try:
             qconn.k(sql)
         except:
             logging.error(sql)
+            logging.error(content)
             logging.error(j[n])
             # exit(-1)
     if blk_num >= blk_circle and blk_num % blk_circle == 0:
