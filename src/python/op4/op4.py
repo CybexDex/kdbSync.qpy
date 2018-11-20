@@ -24,7 +24,7 @@ qconn.k('setDBEnv[`:%s;`%s];' % (config.Q_DBPATH, 'op4') )
 client = MongoClient(config.MONGODB_DB_URL)
 db = client[config.MONGODB_DB_NAME]
 
-def conn_reset(qconn):
+def conn_reset_with_dump(qconn):
     try:
         qconn.k('tbupdate[op4]')
         logging.info( 'dump suceed!')
@@ -33,6 +33,18 @@ def conn_reset(qconn):
     try:
         # qconn.k('mvcsv[`op4]')
         # qconn.k('op4back:op4;delete op4 from `.' )
+        qconn.k('op4back:op4;op4:0#op4 ;' )
+    except:
+        logging.error( 'op4 not found!')
+    qconn.k('\\l ' + config.Q_Script)
+    qconn.k('setDBEnv[`:%s;`%s];' % (config.Q_DBPATH, 'op4') )
+
+
+
+def conn_reset(qconn):
+    logging.info( 'one circle!')
+    return 
+    try:
         qconn.k('op4back:op4;op4:0#op4 ;' )
     except:
         logging.error( 'op4 not found!')
@@ -74,7 +86,7 @@ while 1:
         mongo_blk_num = get_mongo_lib()
         if mongo_blk_num <= blk_num:
             logging.info('mongo blk num is '+ str(mongo_blk_num) )
-            logging.erorr('Zero trx from mongo, please check mongodb!')
+            logging.error('Zero trx from mongo, please check mongodb!')
             time.sleep(10)
             continue
     for n in range(len(j)):#only deal op4
@@ -86,7 +98,8 @@ while 1:
             content[kk] = float(content[kk] )
         json2k = json.dumps(json.dumps(content))
         # sql = 'json2k : ' + json2k + ';ele: enlist .j.k  json2k ;ele: update bulk__block_data__block_time:"P"$bulk__block_data__block_time from ele;'
-        sql = 'json2k : ' + json2k + ';eleUpdate[json2k];'
+        # sql = 'json2k : ' + json2k + ';eleUpdate[json2k];'
+        sql = 'json2k : ' + json2k + ';eleUpdate[json2k];' # update on ele and op4
         try:
             qconn.k(sql)
         except:
@@ -94,6 +107,11 @@ while 1:
             logging.error(content)
             logging.error(j[n])
             # exit(-1)
+    sql = 'expireDel[24];' # delete expilere blk on op4
+    try:
+        qconn.k(sql)
+    except:
+        logging.error('delete expilere blk on op4 failed on ' + str(blk_num))
     if blk_num >= blk_circle and blk_num % blk_circle == 0:
         # qconn = conn_reset(qconn)
         conn_reset(qconn)
