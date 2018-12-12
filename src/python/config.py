@@ -15,5 +15,6 @@ START_BLK = 7000000
 
 
 BTS_NODE = os.environ.get('BTS_NODE', 'ws://127.0.0.1:8090')
+# BTS_NODE = os.environ.get('BTS_NODE', 'ws://47.91.216.172:8090')
 
 

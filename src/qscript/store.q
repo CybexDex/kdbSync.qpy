@@ -18,3 +18,6 @@ tbupdate:{[x]
  t1:`seg`month xgroup (update seg:bulk__block_data__block_num mod 10, month:bulk__block_data__block_time.month from x);
  k1: key t1;
  if[(count k1) > 1;tbstore[t1] each k1;]}
+
+
+
