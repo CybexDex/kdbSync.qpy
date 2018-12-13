@@ -38,4 +38,4 @@ while 1:
     blk_num += 1
 
 
-loggin.info('---------- end -----------------\n')
+logging.info('---------- end -----------------\n')
