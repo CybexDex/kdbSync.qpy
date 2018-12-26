@@ -41,10 +41,12 @@ def conn_reset(qconn):
         logging.error('failed to open qconn with ' + str(config.Q_port))
 
 
+
 def get_lib():
     import os
     try:
-        res = int(os.popen('/usr/bin/python3 ../bts_info.py').read())
+        # res = int(os.popen('/usr/bin/python3 ../bts_info.py').read())
+        res = int(os.popen3(config.cmd_lastblk)[1].read().strip())
     except:
         logging.error('lib script failed')
         exit(1)
@@ -59,7 +61,8 @@ def get_mongo_lib():
 # logging.info("=========== query blocks till -> "+ str(init_size_limit) +"===================\n")
 def get_start(last):
     return last - blk_circle
-lib = get_lib()
+# lib = get_lib()
+lib = get_mongo_lib()
 blk_num = get_start(lib)
 
 logging.info("=========== query blocks start -> "+ str(blk_num) +"===================\n")

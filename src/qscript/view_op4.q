@@ -3,12 +3,13 @@
 / lib::(last op4)`bulk__block_data__block_num
 lib::(select max bulk__block_data__block_num from trade)`bulk__block_data__block_num
 \p 9005
-h:hopen `:localhost:9008:cybexdev:3ff625a14c8a3a6ddf3665c5b6c2798a;
+/ h:hopen `:localhost:9008:cybexdev:3ff625a14c8a3a6ddf3665c5b6c2798a;
+h:hopen `:localhost:9008:sunqi:sunqi123;
 N:10
 
 trade:{[hour]
- dur:hour * 1200;
- res:h"select from trade where (lib - bulk__block_data__block_num) <= ",string(dur);
+ dur:01:00 * hour;
+ res:h"select from trade where (bulk__block_data__block_time + dur) >= max bulk__block_data__block_time ";
  if[hour=24;v_24::res];
  if[hour=12;v_12::res];
  if[hour=1;v_1::res]; }
