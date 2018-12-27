@@ -44,7 +44,8 @@ def conn_reset(qconn):
 def get_lib():
     import os
     try:
-        res = int(os.popen('/usr/bin/python3 ../bts_info.py').read())
+        # res = int(os.popen('/usr/bin/python3 ../bts_info.py').read())
+        res = int(os.popen3(config.cmd_lastblk)[1].read().strip())
     except:
         logging.error('lib script failed')
         exit(1)
@@ -53,8 +54,12 @@ def get_lib():
 # start_blk = config.START_BLK
 blk_circle = 1200*24
 def get_mongo_lib():
-    init_size_limit_json = list(db.account_history.find().sort([("_id",-1)]).limit(1))[0]
-    init_size_limit = init_size_limit_json['bulk']['block_data']['block_num']
+    try:
+        init_size_limit_json = list(db.account_history.find().sort([("_id",-1)]).limit(1))[0]
+        init_size_limit = init_size_limit_json['bulk']['block_data']['block_num']
+    except:
+        logging.error('failed to fetch data from get_mongo_lib!')
+        init_size_limit = 0
     return init_size_limit
 # logging.info("=========== query blocks till -> "+ str(init_size_limit) +"===================\n")
 def get_start(last):

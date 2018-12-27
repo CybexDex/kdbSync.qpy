@@ -17,4 +17,6 @@ START_BLK = -1
 
 BTS_NODE = os.environ.get('BTS_NODE', 'ws://127.0.0.1:8090')
 
+cmd_lastblk = "curl -X GET --header 'Accept: application/json' 'http://120.79.34.14:8081/getlastblocknumbher'"
+
 
