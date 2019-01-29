@@ -15,7 +15,7 @@ eleUpdate:{[json2k]
 
 / N represents expire hour, here should be set as 24
 expireDel:{[N]
- op4::delete from op4 where bulk__block_data__block_num < ((max bulk__block_data__block_num) - N * 1200) }
+ op4::delete from op4 where bulk__block_data__block_time < ((max bulk__block_data__block_time) - N * 01:00:00 ) }
 
 
 tbstore:{[t;kk]
@@ -31,7 +31,7 @@ tbupdate:{[x]
  if[(count k1) > 1;tbstore[t1] each k1;]}
 
 / prepare
-lib::(last op4)`bulk__block_data__block_num
+/ lib::(last op4)`bulk__block_data__block_num
 / trade::op4,op4back 
 trade::op4
 

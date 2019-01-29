@@ -17,6 +17,8 @@ START_BLK = -1
 
 BTS_NODE = os.environ.get('BTS_NODE', 'ws://127.0.0.1:8090')
 
-cmd_lastblk = "curl -X GET --header 'Accept: application/json' 'http://120.79.34.14:8081/getlastblocknumbher'"
+cmd_lastblk_bk1 = "curl -X GET --header 'Accept: application/json' 'http://localhost:8081/getlastblocknumbher'"
+cmd_lastblk = 'curl --data \'{"jsonrpc":"2.0","method":"get_dynamic_global_properties","params":[],"id":1}\' https://apihk.cybex.io '
 
+offset_date = 10
 

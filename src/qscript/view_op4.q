@@ -1,19 +1,16 @@
 
 / prepare
-/ lib::(last op4)`bulk__block_data__block_num
-lib::(select max bulk__block_data__block_num from trade)`bulk__block_data__block_num
 \p 9005
 h:hopen `:localhost:9008:cybexdev:3ff625a14c8a3a6ddf3665c5b6c2798a;
 N:10
 
 trade:{[hour]
- dur:hour * 1200;
- res:h"select from trade where (lib - bulk__block_data__block_num) <= ",string(dur);
+ dur:hour * 01:00:00;
+ res:h"select from trade where (.z.P - bulk__block_data__block_time) <= ",string(dur);
  if[hour=24;v_24::res];
  if[hour=12;v_12::res];
  if[hour=1;v_1::res]; }
 
-/ trade::op4,op4back 
 / non-net
 
 vpay_24::select acct:op__account_id, pamt:op__pays__amount, passet:op__pays__asset_id from v_24
@@ -90,3 +87,7 @@ mvcsv:{ save `op4.csv; system "mv op4.csv /data2/db/tmp/op4.csv.`date +%Y%m%d.%H
 
 reset_conn:{ hclose h;h::hopen `:localhost:9008;}
 
+turnover_24h:{[] a:select sum op__pays__amount by aid:op__pays__asset_id from v_24;b:select sum op__receives__amount by aid:op__receives__asset_id from v_24;c:select aid, v:(op__receives__amount+op__pays__amount)%2 from a lj b;c}
+turnover_24h_s:{[asset_id] a:select sum op__pays__amount by aid:op__pays__asset_id from v_24 where op__pays__asset_id=asset_id;b:select sum op__receives__amount by aid:op__receives__asset_id from v_24 where op__receives__asset_id=asset_id;c:select aid, v:(op__receives__amount+op__pays__amount)%2 from a lj b;c}
+
+fill_count:{[] (count v_24)%2 }

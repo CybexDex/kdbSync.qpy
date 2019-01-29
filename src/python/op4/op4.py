@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-import json
+import json, datetime
 from bson import json_util
 from bson.objectid import ObjectId
 import config
@@ -45,10 +45,17 @@ def get_lib():
     import os
     try:
         # res = int(os.popen('/usr/bin/python3 ../bts_info.py').read())
-        res = int(os.popen3(config.cmd_lastblk)[1].read().strip())
+        # res = int(os.popen3(config.cmd_lastblk)[1].read().strip())
+        res = int(json.loads(os.popen3(config.cmd_lastblk)[1].read())['result']['head_block_number'])
     except:
-        logging.error('lib script failed')
-        exit(1)
+        logging.error('lib config.cmd_lastblk script failed')
+        try:
+            res = int(json.loads(os.popen3(config.cmd_lastblk_bk1)[1].read()))
+        except:
+            logging.error('lib config.cmd_lastblk_bk1 script failed')
+            return None
+    if config.offset_date>0:
+        return res - config.offset_date * 28800
     return res
 
 # start_blk = config.START_BLK
@@ -69,7 +76,7 @@ blk_num = get_start(lib)
 
 logging.info("=========== query blocks start -> "+ str(blk_num) +"===================\n")
 while 1:
-    if blk_num >= lib - 1:
+    if lib == None or blk_num >= lib - 1:
         time.sleep(2)
         lib = get_lib()
         continue
@@ -87,11 +94,11 @@ while 1:
         j[n].pop('_id')
         j[n].pop('result')
         content = flatten(j[n] , '__')
+        if config.offset_date > 0:
+            content['bulk__block_data__block_time'] = (datetime.datetime.strptime(content['bulk__block_data__block_time'],'%Y-%m-%dT%H:%M:%S') + datetime.timedelta(config.offset_date,0,0)).strftime('%Y-%m-%dT%H:%M:%S')
         for kk in ('op__fill_price__quote__amount','op__fill_price__base__amount','op__pays__amount','op__receives__amount'):
             content[kk] = float(content[kk] )
         json2k = json.dumps(json.dumps(content))
-        # sql = 'json2k : ' + json2k + ';ele: enlist .j.k  json2k ;ele: update bulk__block_data__block_time:"P"$bulk__block_data__block_time from ele;'
-        # sql = 'json2k : ' + json2k + ';eleUpdate[json2k];'
         sql = 'json2k : ' + json2k + ';eleUpdate[json2k];' # update on ele and op4
         try:
             qconn.k(sql)
@@ -100,11 +107,12 @@ while 1:
             logging.error(content)
             logging.error(j[n])
             # exit(-1)
-    sql = 'expireDel[24];' # delete expilere blk on op4
-    try:
-        qconn.k(sql)
-    except:
-        logging.error('delete expiler blk on op4 failed on ' + str(blk_num))
+    if len(j) > 0:
+        sql = 'expireDel[24];' # delete expilere blk on op4
+        try:
+            qconn.k(sql)
+        except:
+            logging.error('delete expiler blk on op4 failed on ' + str(blk_num))
     blk_num += 1
 
 qconn.close()
