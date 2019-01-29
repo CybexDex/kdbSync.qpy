@@ -50,9 +50,9 @@ def get_lib():
     except:
         logging.error('lib config.cmd_lastblk script failed')
         try:
-            res = int(json.loads(os.popen3(config.cmd_lastblk_bk1)[1].read()))
+            res = int(json.loads(os.popen3(config.cmd_lastblk1)[1].read()))
         except:
-            logging.error('lib config.cmd_lastblk_bk1 script failed')
+            logging.error('lib config.cmd_lastblk1 script failed')
             return None
     if config.offset_date>0:
         return res - config.offset_date * 28800
