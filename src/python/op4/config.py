@@ -6,7 +6,7 @@ MONGODB_DB_URL = os.environ.get('MONGO_WRAPPER', "mongodb://cybex:Jsh64mcy1H9a@l
 MONGODB_DB_NAME = os.environ.get('MONGO_DB_NAME', 'cybex')
 
 Q_Script = "/home/sunqi/kdbSync.qpy/src/qscript/store_op4_withour_view.q"
-Q_port = 9008
+Q_port = 9005
 Passfile = 'cybexdev:3ff625a14c8a3a6ddf3665c5b6c2798a'
 START_BLK = -1
 
