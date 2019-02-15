@@ -16,30 +16,9 @@ logging.basicConfig(level=logging.DEBUG,
                 filemode='w')
 
 qconn = q.q(host = 'localhost', port = config.Q_port , user = config.Passfile)
-# qconn.k('\\l /home/sunqi/mudb/test1/test.q')
-logging.info("Loading " + config.Q_Script + "...")
-# qconn.k('\\l ' + config.Q_Script )
-qconn.k('setDBEnv[`:%s;`%s];' % (config.Q_DBPATH, 'op4') )
 
 client = MongoClient(config.MONGODB_DB_URL)
 db = client[config.MONGODB_DB_NAME]
-
-
-def conn_reset(qconn):
-    logging.info( 'one circle!')
-    return 
-    try:
-        qconn.k('op4:0#op4 ;' )
-    except:
-        logging.error( 'op4 not found!')
-    qconn.close()
-    try:
-        qconn = q.q(host = 'localhost', port = config.Q_port , user = config.Passfile)
-        qconn.k('\\l ' + config.Q_Script)
-        qconn.k('setDBEnv[`:%s;`%s];' % (config.Q_DBPATH, 'op4') )
-    except:
-        logging.error('failed to open qconn with ' + str(config.Q_port))
-
 
 def get_lib():
     import os
