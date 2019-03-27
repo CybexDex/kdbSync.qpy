@@ -19,9 +19,9 @@ mvcsv:{ save `op4.csv; system "mv op4.csv /data2/db/tmp/op4.csv.`date +%Y%m%d.%H
 / prepare
 N:10
 
-v_24:: select from op4 where (.z.P - bulk__block_data__block_time) <= 24:00:00
-v_12:: select from op4 where (.z.P - bulk__block_data__block_time) <= 12:00:00
-v_1:: select from op4 where (.z.P - bulk__block_data__block_time) <= 01:00:00
+v_24:: select from op4 where (.z.p - bulk__block_data__block_time) <= 24:00:00
+v_12:: select from op4 where (.z.p - bulk__block_data__block_time) <= 12:00:00
+v_1:: select from op4 where (.z.p - bulk__block_data__block_time) <= 01:00:00
 
 / non-net
 
@@ -98,7 +98,8 @@ top_pair_net_sell_24::raze {select [N] from flip x} each select basset,qasset, a
 mvcsv:{ save `op4.csv; system "mv op4.csv /data2/db/tmp/op4.csv.`date +%Y%m%d.%H%M%S`";}
 
 
-turnover_24h:{[] a:select sum op__pays__amount by aid:op__pays__asset_id from v_24;b:select sum op__receives__amount by aid:op__receives__asset_id from v_24;c:select aid, v:(op__receives__amount+op__pays__amount)%2 from a lj b;c}
+/ turnover_24h:{[] a:select sum op__pays__amount by aid:op__pays__asset_id from v_24;b:select sum op__receives__amount by aid:op__receives__asset_id from v_24;c:select aid, v:(op__receives__amount+op__pays__amount)%2 from a lj b;c}
+turnover_24h:{[] a:select sum op__pays__amount by aid:op__pays__asset_id from v_24;select aid, v:op__pays__amount from a }
 turnover_24h_s:{[asset_id] a:select sum op__pays__amount by aid:op__pays__asset_id from v_24 where op__pays__asset_id=asset_id;b:select sum op__receives__amount by aid:op__receives__asset_id from v_24 where op__receives__asset_id=asset_id;c:select aid, v:(op__receives__amount+op__pays__amount)%2 from a lj b;c}
 
 fill_count:{[] (count v_24)%2 }

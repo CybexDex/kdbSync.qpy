@@ -6,7 +6,7 @@ N:10
 
 trade:{[hour]
  dur:hour * 01:00:00;
- res:h"select from trade where (.z.P - bulk__block_data__block_time) <= ",string(dur);
+ res:h"select from trade where (.z.p - bulk__block_data__block_time) <= ",string(dur);
  if[hour=24;v_24::res];
  if[hour=12;v_12::res];
  if[hour=1;v_1::res]; }

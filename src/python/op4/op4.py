@@ -12,7 +12,7 @@ import q, logging, time
 logging.basicConfig(level=logging.DEBUG,
                 format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                 datefmt='%a, %d %b %Y %H:%M:%S',
-                filename='log.log',
+                filename='/tmp/op4.log',
                 filemode='w')
 
 qconn = q.q(host = 'localhost', port = config.Q_port , user = config.Passfile)
@@ -58,6 +58,7 @@ logging.info("=========== query blocks start -> "+ str(blk_num) +"==============
 while 1:
     if lib == None or blk_num >= lib - 1:
         time.sleep(2)
+        logging.info('reset blk')
         lib = get_lib()
         continue
     logging.info("----------deal block " + str(blk_num))
