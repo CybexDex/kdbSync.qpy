@@ -63,12 +63,12 @@ r3_24::select acct,ramt,asset,0^ {x@0} each pamt from r1_24 lj p2_24
 r3_12::select acct,ramt,asset,0^ {x@0} each pamt from r1_12 lj p2_12
 r3_1::select acct,ramt,asset,0^ {x@0} each pamt from r1_1 lj p2_1
 
-top_net_buy_24::raze {select [N] from flip x} each  select asset,acct,pamt by asset from `asset`pamt xdesc (select from (select sum (pamt - ramt ) by asset, acct from p3_24) where pamt >=0 )
-top_net_buy_12::raze {select [N] from flip x} each  select asset,acct,pamt by asset from `asset`pamt xdesc (select from ( select sum (pamt - ramt ) by asset, acct from p3_12) where pamt >= 0)
-top_net_buy_1::raze {select [N] from flip x} each  select asset,acct,pamt by asset from `asset`pamt xdesc (select from (select sum (pamt - ramt ) by asset, acct from p3_1) where pamt >=0 )
-top_net_sell_24::raze {select [N] from flip x} each  select asset,acct,ramt by asset from `asset`ramt xdesc (select from (select sum (ramt - pamt ) by asset, acct from r3_24) where ramt >= 0)
-top_net_sell_12::raze {select [N] from flip x} each  select asset,acct,ramt by asset from `asset`ramt xdesc (select from (select sum (ramt - pamt ) by asset, acct from r3_12) where ramt >= 0)
-top_net_sell_1::raze {select [N] from flip x} each  select asset,acct,ramt by asset from `asset`ramt xdesc (select from (select sum (ramt - pamt ) by asset, acct from r3_1) where ramt >= 0)
+top_net_sell_24::raze {select [N] from flip x} each  select asset,acct,pamt by asset from `asset`pamt xdesc (select from (select sum (pamt - ramt ) by asset, acct from p3_24) where pamt >=0 )
+top_net_sell_12::raze {select [N] from flip x} each  select asset,acct,pamt by asset from `asset`pamt xdesc (select from ( select sum (pamt - ramt ) by asset, acct from p3_12) where pamt >= 0)
+top_net_sell_1::raze {select [N] from flip x} each  select asset,acct,pamt by asset from `asset`pamt xdesc (select from (select sum (pamt - ramt ) by asset, acct from p3_1) where pamt >=0 )
+top_net_buy_24::raze {select [N] from flip x} each  select asset,acct,ramt by asset from `asset`ramt xdesc (select from (select sum (ramt - pamt ) by asset, acct from r3_24) where ramt >= 0)
+top_net_buy_12::raze {select [N] from flip x} each  select asset,acct,ramt by asset from `asset`ramt xdesc (select from (select sum (ramt - pamt ) by asset, acct from r3_12) where ramt >= 0)
+top_net_buy_1::raze {select [N] from flip x} each  select asset,acct,ramt by asset from `asset`ramt xdesc (select from (select sum (ramt - pamt ) by asset, acct from r3_1) where ramt >= 0)
 
 / pair
 pv_24::select acct:op__account_id, pamt:op__pays__amount, passet:op__pays__asset_id, ramt:op__receives__amount, rasset:op__receives__asset_id, basset:(op__fill_price__base__asset_id),qasset:(op__fill_price__quote__asset_id) from v_24
