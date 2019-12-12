@@ -38,11 +38,11 @@ test_pair_sort:{[timepoint]  start:"P"$timepoint;  end :"P"$(13#(string (last op
 / get_table:{[k;passet;rasset] select [M] from k xdesc (select account:op__account_id,total_pay,total_receive,last_update from pair_sort_table where (op__pays__asset_id = passet) and (op__receives__asset_id = rasset)) }
 get_ptable:{[passet;rasset] select  from `amt xdesc (select account:op__account_id,amt:total_pay,last_update from pair_sort_table where (op__pays__asset_id = passet) and (op__receives__asset_id = rasset)) }
 get_rtable:{[passet;rasset] select  from `amt  xdesc (select account:op__account_id,amt:total_receive,last_update from pair_sort_table where (op__pays__asset_id = passet) and (op__receives__asset_id = rasset)) }
-get_rank:{[base_asset;quote_asset]a:get_ptable[base_asset;quote_asset];b:get_rtable[quote_asset;base_asset];select [N] account, total:amt, pay, receive from `amt xdesc (update pay:amt from delete last_update from `account xkey a) + (update receive:amt from delete last_update from `account xkey b)}
+get_rank:{[base_asset;quote_asset]a:get_ptable[base_asset;quote_asset];b:get_rtable[quote_asset;base_asset];select [M] account, total:amt, pay, receive from `amt xdesc (update pay:amt from delete last_update from `account xkey a) + (update receive:amt from delete last_update from `account xkey b)}
 Update:{[] pair_sort[string latest_time]; }
 / init_pair_sort[string latest_time]
 .z.ts:{ Update[];}
-/ \t 1800
+\t 1800
 
 
 

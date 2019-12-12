@@ -39,10 +39,11 @@ def get_lib():
     return res
 
 # start_blk = config.START_BLK
-blk_circle = 1200*24
+# blk_circle = 1200*24
+blk_circle = config.blk_circle
 def get_mongo_lib():
     try:
-        init_size_limit_json = list(db.account_history.find().sort([("_id",-1)]).limit(1))[0]
+        init_size_limit_json = list(db.account_history.find().sort([("bulk.block_data.block_num",-1)]).limit(1))[0]
         init_size_limit = init_size_limit_json['bulk']['block_data']['block_num']
     except:
         logging.error('failed to fetch data from get_mongo_lib!')
